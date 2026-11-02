@@ -1,0 +1,168 @@
+<Page
+    x:Class="TimeTrackingStudio.WinUI.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TimeTrackingStudio.WinUI.Models"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="28,20,28,32">
+        <StackPanel Spacing="24">
+            <!-- Header con título y botón de actualización -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Panel de Control" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" />
+                    <TextBlock Text="Resumen de actividad diaria, rendimiento semanal y proyectos en curso" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <Button Grid.Column="1" Command="{x:Bind ViewModel.RefreshDataCommand}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                        <TextBlock Text="Actualizar" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Tarjetas de Métricas KPI -->
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- KPI: Horas Hoy -->
+                <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE823;" Foreground="#0078D4" FontSize="18" />
+                            <TextBlock Text="HORAS HOY" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
+                            <TextBlock Text="{x:Bind ViewModel.Metrics.HoursToday, Mode=OneWay}" FontSize="28" FontWeight="Bold" />
+                            <TextBlock Text="h" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                        <TextBlock Text="Trabajadas durante la jornada" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- KPI: Facturable Hoy -->
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8C7;" Foreground="#107C41" FontSize="18" />
+                            <TextBlock Text="FACTURABLE HOY" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Bottom">
+                            <TextBlock Text="$" FontSize="20" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                            <TextBlock Text="{x:Bind ViewModel.Metrics.BillableToday, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#107C41" />
+                        </StackPanel>
+                        <TextBlock Text="Ingresos estimados de hoy" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- KPI: Horas Mes -->
+                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE787;" Foreground="#8764B8" FontSize="18" />
+                            <TextBlock Text="HORAS ESTE MES" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
+                            <TextBlock Text="{x:Bind ViewModel.Metrics.HoursThisMonth, Mode=OneWay}" FontSize="28" FontWeight="Bold" />
+                            <TextBlock Text="h" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                        <TextBlock Text="Acumuladas en el mes actual" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- KPI: Trabajos Activos -->
+                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7C3;" Foreground="#D83B01" FontSize="18" />
+                            <TextBlock Text="TRABAJOS ACTIVOS" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.Metrics.ActiveJobsCount, Mode=OneWay}" FontSize="28" FontWeight="Bold" />
+                        <TextBlock Text="Pendientes o en progreso" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Sección Gráfica: Rendimiento últimos 7 días -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Horas Registradas - Últimos 7 Días" FontWeight="SemiBold" FontSize="16" />
+                        <TextBlock Text="Distribución diaria de esfuerzo y dedicación horaria" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+
+                    <!-- Barras visuales dinámicas -->
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.Metrics.Last7Days, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24" Height="180" VerticalAlignment="Bottom" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:DailyHourStat">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Spacing="8" Width="70">
+                                    <TextBlock Text="{x:Bind FormattedHours}" HorizontalAlignment="Center" FontSize="11" FontWeight="SemiBold" Foreground="#0078D4" />
+                                    <Border Height="{x:Bind BarHeight}" Width="36" Background="#0078D4" CornerRadius="4,4,0,0" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind DayName}" HorizontalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Trabajos Activos Recientes -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Trabajos Activos en Curso" FontWeight="SemiBold" FontSize="16" />
+
+                    <ListView ItemsSource="{x:Bind ViewModel.ActiveJobs, Mode=OneWay}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Job">
+                                <Grid Padding="0,10" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" FontSize="14" />
+                                        <TextBlock Text="{x:Bind ClientName}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Avance Estimado" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <ProgressBar Value="{x:Bind ProgressPercentage}" Maximum="100" Margin="0,4,16,0" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="Horas Registradas" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind LoggedHours}" FontSize="13" FontWeight="SemiBold" />
+                                    </StackPanel>
+
+                                    <!-- Estado -->
+                                    <Border Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="8,4" CornerRadius="12" Background="{x:Bind Status, Converter={StaticResource StatusToBrushConverter}}">
+                                        <TextBlock Text="{x:Bind Status}" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

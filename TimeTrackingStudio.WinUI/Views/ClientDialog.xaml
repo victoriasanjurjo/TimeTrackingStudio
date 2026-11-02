@@ -1,0 +1,40 @@
+<ContentDialog
+    x:Class="TimeTrackingStudio.WinUI.Views.ClientDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Ficha de Cliente"
+    PrimaryButtonText="Guardar"
+    CloseButtonText="Cancelar"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="400" Margin="0,12,0,0">
+        <TextBox x:Name="NameTextBox" Header="Nombre o Contacto *" PlaceholderText="Ej. Carlos Mendoza" />
+        <TextBox x:Name="CompanyTextBox" Header="Empresa / Organización" PlaceholderText="Ej. Acme Corp" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="EmailTextBox" Grid.Column="0" Header="Correo Electrónico" PlaceholderText="ejemplo@correo.com" />
+            <TextBox x:Name="PhoneTextBox" Grid.Column="1" Header="Teléfono" PlaceholderText="+34 ..." />
+        </Grid>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <NumberBox x:Name="HourlyRateNumberBox" Grid.Column="0" Header="Tarifa por Hora *" Value="50.0" SpinButtonPlacementMode="Inline" SmallChange="5" />
+            <ComboBox x:Name="CurrencyComboBox" Grid.Column="1" Header="Divisa" HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="USD" IsSelected="True" />
+                <ComboBoxItem Content="EUR" />
+                <ComboBoxItem Content="ARS" />
+                <ComboBoxItem Content="MXN" />
+                <ComboBoxItem Content="GBP" />
+            </ComboBox>
+        </Grid>
+        <TextBox x:Name="NotesTextBox" Header="Notas y Acuerdos" PlaceholderText="Detalles adicionales sobre el cliente o proyecto..." AcceptsReturn="True" Height="70" />
+    </StackPanel>
+</ContentDialog>

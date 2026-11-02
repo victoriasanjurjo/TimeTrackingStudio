@@ -1,0 +1,46 @@
+<ContentDialog
+    x:Class="TimeTrackingStudio.WinUI.Views.JobDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TimeTrackingStudio.WinUI.Models"
+    mc:Ignorable="d"
+    Title="Ficha de Trabajo / Tarea"
+    PrimaryButtonText="Guardar"
+    CloseButtonText="Cancelar"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="440" Margin="0,12,0,0">
+        <ComboBox x:Name="ClientComboBox" Header="Cliente *" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
+        <TextBox x:Name="TitleTextBox" Header="Título del Trabajo / Tarea *" PlaceholderText="Ej. Desarrollo de Landing Page" />
+        <TextBox x:Name="DescriptionTextBox" Header="Descripción y Alcance" PlaceholderText="Detalles técnicos o requerimientos..." AcceptsReturn="True" Height="65" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ComboBox x:Name="StatusComboBox" Grid.Column="0" Header="Estado" HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="Pendiente" IsSelected="True" />
+                <ComboBoxItem Content="En progreso" />
+                <ComboBoxItem Content="En revisión" />
+                <ComboBoxItem Content="Entregado" />
+                <ComboBoxItem Content="Facturado" />
+            </ComboBox>
+            <ComboBox x:Name="PriorityComboBox" Grid.Column="1" Header="Prioridad" HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="Baja" />
+                <ComboBoxItem Content="Media" IsSelected="True" />
+                <ComboBoxItem Content="Alta" />
+                <ComboBoxItem Content="Urgente" />
+            </ComboBox>
+        </Grid>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <NumberBox x:Name="EstimatedHoursNumberBox" Grid.Column="0" Header="Horas Estimadas" Value="10.0" SpinButtonPlacementMode="Inline" SmallChange="1" />
+            <DatePicker x:Name="DueDatePicker" Grid.Column="1" Header="Fecha Límite" HorizontalAlignment="Stretch" />
+        </Grid>
+    </StackPanel>
+</ContentDialog>

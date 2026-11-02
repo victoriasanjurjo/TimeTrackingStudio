@@ -1,0 +1,16 @@
+<Application
+    x:Class="TimeTrackingStudio.WinUI.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TimeTrackingStudio.WinUI"
+    xmlns:converters="using:TimeTrackingStudio.WinUI.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+            <converters:PriorityToBrushConverter x:Key="PriorityToBrushConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

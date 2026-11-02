@@ -1,0 +1,27 @@
+<ContentDialog
+    x:Class="TimeTrackingStudio.WinUI.Views.TimeEntryDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TimeTrackingStudio.WinUI.Models"
+    mc:Ignorable="d"
+    Title="Añadir Entrada Manual de Tiempo"
+    PrimaryButtonText="Guardar Entrada"
+    CloseButtonText="Cancelar"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="440" Margin="0,12,0,0">
+        <ComboBox x:Name="JobComboBox" Header="Trabajo o Proyecto *" HorizontalAlignment="Stretch" DisplayMemberPath="Title" />
+        <TextBox x:Name="DescriptionTextBox" Header="Descripción de la Actividad" PlaceholderText="¿En qué trabajaste? (Opcional)" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <DatePicker x:Name="EntryDatePicker" Grid.Column="0" Header="Fecha" HorizontalAlignment="Stretch" />
+            <NumberBox x:Name="HoursNumberBox" Grid.Column="1" Header="Horas Invertidas *" Value="1.0" SpinButtonPlacementMode="Inline" SmallChange="0.5" />
+        </Grid>
+        <CheckBox x:Name="BillableCheckBox" Content="Es facturable al cliente" IsChecked="True" />
+    </StackPanel>
+</ContentDialog>

@@ -1,0 +1,25 @@
+# Compilaciones y artefactos de .NET / C#
+bin/
+obj/
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio y JetBrains
+.vs/
+.idea/
+.vscode/
+
+# Salidas de reportes generados
+outputs/*.csv
+outputs/*.html
+*.log
+
+# Bases de datos temporales
+*.db-journal
+*.sqlite3-journal
