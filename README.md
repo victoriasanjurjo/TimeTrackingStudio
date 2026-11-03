@@ -1,109 +1,107 @@
-# Time Tracking Studio ⏱️ (WinUI 3 & C#)
+# Time Tracking Studio ⏱️ (Rust & Tauri v2)
 
-**Time Tracking Studio** es una aplicación de escritorio nativa, moderna y de alto rendimiento para **Windows 10 y Windows 11**, diseñada para profesionales independientes, desarrolladores, agencias y estudios que desean gestionar sus clientes, proyectos y seguimiento de tiempos trabajados **con privacidad absoluta (100% local)**, sin telemetría ni suscripciones en la nube.
+**Time Tracking Studio** es una aplicación de escritorio nativa, moderna, ultraligera y de alto rendimiento para **Windows 10 y Windows 11**, diseñada para profesionales independientes, desarrolladores, agencias y estudios que desean gestionar sus clientes, proyectos y seguimiento de tiempos trabajados **con privacidad absoluta (100% local)**, sin telemetría, sin suscripciones en la nube y con arranque instantáneo.
 
-La aplicación está construida íntegramente en **C# y .NET 8**, utilizando la interfaz gráfica nativa **WinUI 3 (Windows App SDK)** con controles **Fluent Design**, arquitectura **MVVM (Model-View-ViewModel)** mediante **CommunityToolkit.Mvvm**, persistencia relacional con **SQLite** y empaquetado nativo en formato **MSIX**.
+La aplicación está construida íntegramente en **Rust** utilizando el framework de nueva generación **Tauri v2**, el motor de renderizado acelerado por hardware **Microsoft WebView2**, persistencia relacional con **SQLite** embebido de forma estática (`rusqlite bundled`) y generación directa de binarios standalone `.exe`.
 
 ---
 
 ## 🌟 Características Principales
 
-- **🔒 100% Local y Privada:** Sin llamadas de red, sin publicidad, sin rastreadores ni telemetría. La base de datos SQLite reside en tu propio equipo.
-- **⏱ Cronómetro Global en Vivo:** Barra superior persistente con selector dinámico de cliente y trabajo, display digital de precisión (`00:00:00`), botones de iniciar, pausar, reanudar, descartar y guardar sesión trabajada.
-- **👥 Gestión de Clientes:** Fichas de clientes con datos de contacto (empresa, email, teléfono), tarifas por hora configurables, divisa (`USD`, `EUR`, `ARS`, `MXN`, `GBP`) y cálculo automático de facturación acumulada.
-- **📁 Control Total de Trabajos y Tareas:** Registro de tareas con estados oficiales:
+- **🔒 100% Local y Privada:** Sin llamadas de red, sin publicidad, sin rastreadores ni telemetría. La base de datos SQLite reside íntegramente en tu propio equipo (`%LocalAppData%\TimeTrackingStudio\timetracker.db`).
+- **⏱ Cronómetro Global en Vivo:** Barra superior persistente con selector dinámico de clientes y tareas activas, display digital monospace de alta precisión (`00:00:00`), controles de iniciar, pausar, reanudar, descartar y guardar sesión en la base de datos con un clic.
+- **👥 Directorio de Clientes:** Fichas de clientes con datos de contacto (empresa, email, teléfono), tarifas por hora configurables, divisa personalizada (`USD`, `EUR`, `ARS`, `MXN`, `GBP`), estado activo/inactivo y cálculo automático de facturación acumulada.
+- **📁 Control Total de Trabajos y Tareas:** Registro de tareas y proyectos con estados oficiales:
   - 🟡 `Pendiente`
   - 🟠 `En progreso`
   - 🔵 `En revisión`
   - 🟢 `Entregado`
   - 🟣 `Facturado`
-  - Prioridades (`Baja`, `Media`, `Alta`, `Urgente`), cálculo automático de horas estimadas vs registradas y barras de progreso.
-- **📊 Panel de Control (Dashboard):** Tarjetas de KPIs en vivo (Horas Hoy, Total Facturable Hoy, Horas Mes, Trabajos Activos) y visualizador dinámico del rendimiento en los últimos 7 días.
-- **⏱ Hoja de Tiempos (Timesheet):** Registro histórico detallado con auditoría de sesiones, adición manual de horas trabajadas y eliminación de entradas.
-- **📄 Reportes Ejecutivos y Exportación (`outputs/`):** Generador de informes maquetados en **HTML** con diseño formal y exportación completa a formato **CSV**.
-- **📦 Empaquetado Nativo MSIX (.msix):** Listo para su instalación y distribución en Windows con integración directa al sistema operativo.
+  - Prioridades (`Baja`, `Media`, `Alta`, `Urgente`), cálculo automático de horas estimadas vs registradas, barras de progreso dinámicas y selector de estado rápido en tabla.
+- **📊 Panel de Control (Dashboard):** Tarjetas de KPIs en tiempo real (Horas Hoy, Total Facturable Hoy, Horas Mes, Trabajos Activos, Clientes Totales) y visualizador gráfico dinámico del rendimiento en los últimos 7 días.
+- **⏱ Hoja de Tiempos (Timesheet):** Registro cronológico detallado con filtros por cliente, trabajo y rango de fechas, adición manual de horas trabajadas y eliminación de registros.
+- **📄 Reportes Ejecutivos y Exportación (`outputs/`):** Generador de informes maquetados en formato **HTML** formal y exportación completa a tablas de datos **CSV** con botón directo para abrir la carpeta contenedora.
+- **⚡ Binario Standalone Ultra Ligero (`dist/TimeTrackingStudio.exe`):** Ejecutable único de aproximadamente ~11 MB con motor SQLite compilado estáticamente, sin necesidad de instalar runtimes externos como .NET o Python.
 
 ---
 
 ## 🏛 Arquitectura y Componentes del Sistema
 
-El software sigue estrictamente el patrón arquitectónico **MVVM (Model-View-ViewModel)**:
+El sistema implementa una arquitectura por capas desacoplada basada en comandos asíncronos nativos IPC:
 
 ```text
 ┌────────────────────────────────────────────────────────┐
-│                      CAPA DE VISTAS                    │
-│    MainWindow.xaml, DashboardPage.xaml, ClientsPage... │
-│         (XAML Controls, Converters, NavigationView)    │
+│                   CAPA DE INTERFAZ WEB                 │
+│         (HTML5, CSS Moderno Fluent, Vanilla JS)        │
+│          src/index.html, src/styles.css, src/app.js    │
 └───────────────────────────▲────────────────────────────┘
-                            │ Data Binding (x:Bind)
+                            │ Tauri IPC (invoke commands)
 ┌───────────────────────────▼────────────────────────────┐
-│                    CAPA VIEWMODEL                      │
-│   MainViewModel, DashboardViewModel, ClientsViewModel  │
-│      (CommunityToolkit.Mvvm: ObservableObject, Relay)   │
+│                    CAPA TAURI COMMANDS                 │
+│         src-tauri/src/commands.rs (Handlers)           │
+│   (get_clients, add_job, add_time_log, export_csv...)  │
 └───────────────────────────▲────────────────────────────┘
-                            │ Llamadas asíncronas / eventos
+                            │ Tipado estricto & serialización
 ┌───────────────────────────▼────────────────────────────┐
-│                   CAPA DE SERVICIOS                    │
-│    DatabaseService, ClientService, JobService, Time... │
+│                 CAPA DE NEGOCIO Y MODELOS              │
+│       src-tauri/src/models.rs & export.rs              │
+│      (Client, Job, TimeLog, DashboardMetrics)          │
 └───────────────────────────▲────────────────────────────┘
-                            │ Consultas SQL seguras
+                            │ Mutex<Connection> + rusqlite
 ┌───────────────────────────▼────────────────────────────┐
 │                  CAPA DE PERSISTENCIA                  │
-│       SQLite Local (%LocalAppData%/TimeTrackingStudio) │
+│                src-tauri/src/db.rs                     │
+│         SQLite Local (%LocalAppData%/TimeTrackingStudio)│
 └────────────────────────────────────────────────────────┘
 ```
 
-1. **Capa de Persistencia y Negocio (`TimeTrackingStudio.WinUI/Services/`):**
-   - [`DatabaseService.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Services/DatabaseService.cs): Gestor SQLite (`Microsoft.Data.Sqlite`) con claves foráneas activas y semilla de datos demostrativa.
-   - [`ClientService.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Services/ClientService.cs): Operaciones CRUD de clientes y cálculo de ingresos.
-   - [`JobService.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Services/JobService.cs): Lógica de estados, prioridades y horas estimadas.
-   - [`TimeService.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Services/TimeService.cs): Cronómetro en memoria coordinado con el `DispatcherQueue` de WinUI.
-   - [`ExportService.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Services/ExportService.cs): Exportación a CSV y generación de informes ejecutivos en HTML dentro de `outputs/`.
+### Componentes:
 
-2. **Capa de ViewModels (`TimeTrackingStudio.WinUI/ViewModels/`):**
-   - [`MainViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/MainViewModel.cs): Orquesta el cronómetro persistente global.
-   - [`DashboardViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/DashboardViewModel.cs): Métricas y analíticas.
-   - [`ClientsViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/ClientsViewModel.cs): Directorio y búsqueda de clientes.
-   - [`JobsViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/JobsViewModel.cs): Seguimiento de proyectos y estados.
-   - [`TimesheetViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/TimesheetViewModel.cs): Hoja de tiempos y entradas manuales.
-   - [`ReportsViewModel.cs`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/ViewModels/ReportsViewModel.cs): Exportación y resumen ejecutivo.
+1. **Capa Frontend (`src/`):**
+   - [`index.html`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src/index.html): Estructura semántica, barra superior de cronómetro, sidebar de navegación, modales y tablas de datos.
+   - [`styles.css`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src/styles.css): Diseño moderno, claro y funcional con paleta neutral de alto contraste y controles inspirados en Fluent Design.
+   - [`app.js`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src/app.js): Controlador reactivo del cronómetro, llamadas asíncronas IPC vía Tauri y actualización dinámica del DOM.
 
-3. **Capa de Vistas XAML (`TimeTrackingStudio.WinUI/Views/`):**
-   - [`MainWindow.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/MainWindow.xaml): Ventana principal con barra de cronómetro superior y `NavigationView`.
-   - [`DashboardPage.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/DashboardPage.xaml): Panel de control con tarjetas KPI y gráfico de barras semanal.
-   - [`ClientsPage.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/ClientsPage.xaml) / [`ClientDialog.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/ClientDialog.xaml): Directorio modal de clientes.
-   - [`JobsPage.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/JobsPage.xaml) / [`JobDialog.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/JobDialog.xaml): Gestión modal de tareas.
-   - [`TimesheetPage.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/TimesheetPage.xaml) / [`TimeEntryDialog.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/TimeEntryDialog.xaml): Hoja de tiempos y registro manual.
-   - [`ReportsPage.xaml`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/TimeTrackingStudio.WinUI/Views/ReportsPage.xaml): Generación de informes.
+2. **Capa Backend en Rust (`src-tauri/src/`):**
+   - [`models.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/models.rs): Estructuras de dominio fuertemente tipadas y serializables (`Client`, `Job`, `TimeLog`, `DashboardMetrics`) y lógica de cálculo numérico puro.
+   - [`db.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/db.rs): Gestor SQLite (`rusqlite`) con claves foráneas activas, transacciones seguras, semilla de datos inicial y soporte para bases de datos en memoria para testing.
+   - [`export.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/export.rs): Exportación estructurada a formato CSV y generación de informes ejecutivos en HTML dentro de la carpeta `outputs/`.
+   - [`commands.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/commands.rs): Handlers de comandos expuestos al frontend para operaciones CRUD y utilidades de sistema.
+   - [`lib.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/lib.rs) & [`main.rs`](file:///d:/Proyectos/Repos/TimeTrackingStudio/src-tauri/src/main.rs): Inicialización del runtime de Tauri v2 y registro del estado global y comandos.
 
 ---
 
-## 📁 Estructura del Directorio
+## 📁 Estructura del Proyecto
 
 ```text
 TimeTrackingStudio/
 ├── assets/                          # Iconos oficiales (.ico, .png)
-├── config/                          # Archivo de base de datos local SQLite
-├── dist/                            # Paquete de instalación (.msix)
+├── config/                          # Configuración local de base de datos
+├── dist/                            # Ejecutable final compilado (.exe)
+│   └── TimeTrackingStudio.exe
 ├── docs/                            # Documentación técnica y arquitectura
-│   └── arquitectura_winui3.md
-├── outputs/                         # Salida de informes HTML y CSV
-├── tests/                           # Suite de pruebas unitarias (.NET)
-│   └── TimeTrackingStudio.Tests/
-├── TimeTrackingStudio.WinUI/        # Código fuente de la aplicación WinUI 3
-│   ├── Assets/                      # Recursos visuales del paquete MSIX
-│   ├── Converters/                  # Conversores XAML de estilo
-│   ├── Models/                      # Entidades de dominio
-│   ├── Services/                    # Servicios de negocio y persistencia
-│   ├── ViewModels/                  # ViewModels MVVM
-│   ├── Views/                       # Páginas y Diálogos XAML
-│   ├── App.xaml / .xaml.cs          # Ciclo de vida de la aplicación
-│   ├── MainWindow.xaml / .cs        # Ventana principal
-│   ├── Package.appxmanifest         # Manifiesto MSIX
-│   └── TimeTrackingStudio.WinUI.csproj
-├── .gitignore
-├── LICENSE.txt
-└── README.md
+│   ├── arquitectura_tauri_v2.md
+│   └── changelog.md
+├── outputs/                         # Salida de reportes CSV e informes HTML
+├── src/                             # Código fuente de la interfaz web
+│   ├── app.js
+│   ├── index.html
+│   └── styles.css
+├── src-tauri/                       # Backend nativo en Rust con Tauri v2
+│   ├── capabilities/                # Permisos de seguridad desktop
+│   ├── icons/                       # Iconos empaquetados para la app
+│   ├── src/                         # Módulos Rust (commands, db, export, models, lib, main)
+│   ├── tests/                       # Pruebas de integración automatizadas
+│   │   └── calculations_tests.rs
+│   ├── build.rs                     # Script de construcción de Tauri
+│   ├── Cargo.toml                   # Dependencias Rust de la app Tauri
+│   └── tauri.conf.json              # Configuración de ventana y bundler Tauri v2
+├── tests/                           # Suite de pruebas de referencia
+│   └── calculations_tests.rs
+├── .gitignore                       # Exclusiones git (target, temporales)
+├── Cargo.toml                       # Espacio de trabajo (workspace) raíz Cargo
+├── LICENSE.txt                      # Licencia MIT completa
+└── README.md                        # Documentación general y guía de ejecución
 ```
 
 ---
@@ -111,34 +109,35 @@ TimeTrackingStudio/
 ## 🚀 Guía de Instalación y Ejecución
 
 ### Prerrequisitos
-- **Windows 10 versión 1809 (build 17763) o superior / Windows 11**.
-- **.NET 8 SDK** instalado.
+- **Windows 10 versión 1809 o superior / Windows 11**.
+- **Rust Toolchain** instalado (Rust 1.90+): `rustc` y `cargo`.
+- **Microsoft WebView2 Runtime** (incluido por defecto en Windows 10/11).
 
-### 1. Ejecutar en modo desarrollo
-Para compilar y lanzar la aplicación directamente en modo desarrollo:
+### 1. Ejecutar en Modo Desarrollo
+Para compilar y lanzar la aplicación en modo desarrollo:
 ```powershell
-dotnet run --project TimeTrackingStudio.WinUI\TimeTrackingStudio.WinUI.csproj -p:Platform=x64
+cargo run --manifest-path src-tauri/Cargo.toml
 ```
 
-### 2. Ejecutar la Suite de Pruebas Unitarias
-Para ejecutar las pruebas automáticas de modelos y cálculos:
+### 2. Ejecutar la Suite de Pruebas Automatizadas
+Para ejecutar las pruebas unitarias y de integración de modelos y base de datos:
 ```powershell
-dotnet test tests\TimeTrackingStudio.Tests\TimeTrackingStudio.Tests.csproj
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-### 3. Compilar el Paquete MSIX (.msix) para Distribución
-Para generar el paquete de instalación atómico `.msix`:
+### 3. Compilar el Binario Ejecutable Standalone (.exe)
+Para generar el archivo ejecutable optimizado de producción:
 ```powershell
-dotnet publish TimeTrackingStudio.WinUI\TimeTrackingStudio.WinUI.csproj -c Release -p:Platform=x64 -p:GenerateAppxPackageOnBuild=true -p:AppxPackageSigningEnabled=false
+cargo build --release --manifest-path src-tauri/Cargo.toml
 ```
 
-El instalador MSIX queda disponible en:
+El binario ejecutable standalone queda listo en:
 ```text
-dist/TimeTrackingStudio_v1.0.0_x64.msix
+dist/TimeTrackingStudio.exe
 ```
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia **MIT**. Consulta el archivo [`LICENSE.txt`](file:///d:/Proyectos/Repos/Nueva%20carpeta%20%282%29/LICENSE.txt) para más detalles.
+Este proyecto está distribuido bajo los términos de la Licencia **MIT**. Consulta el archivo [`LICENSE.txt`](file:///d:/Proyectos/Repos/TimeTrackingStudio/LICENSE.txt) para más información.

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time Tracking Studio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- BARRA SUPERIOR: CRONÓMETRO GLOBAL EN VIVO -->
+    <header class="top-header">
+      <div class="header-brand">
+        <span class="brand-icon">⏱️</span>
+        <div class="brand-text">
+          <span class="brand-title">Time Tracking Studio</span>
+          <span class="brand-badge">Rust & Tauri v2</span>
+        </div>
+      </div>
+
+      <div class="timer-controls-container">
+        <div class="timer-selectors">
+          <select id="timer-job-select" class="form-control select-job" title="Selecciona un trabajo activo">
+            <option value="">-- Seleccionar Trabajo --</option>
+          </select>
+          <input type="text" id="timer-desc-input" class="form-control input-desc" placeholder="¿En qué estás trabajando ahora mismo?" />
+        </div>
+
+        <div class="timer-display-box">
+          <span id="timer-digital-display" class="timer-digital">00:00:00</span>
+        </div>
+
+        <div class="timer-actions">
+          <button id="btn-timer-start" class="btn btn-success btn-timer">
+            <span class="icon">▶</span> <span class="label">Iniciar</span>
+          </button>
+          <button id="btn-timer-pause" class="btn btn-warning btn-timer hidden">
+            <span class="icon">⏸</span> <span class="label">Pausar</span>
+          </button>
+          <button id="btn-timer-save" class="btn btn-primary btn-timer hidden">
+            <span class="icon">💾</span> <span class="label">Guardar</span>
+          </button>
+          <button id="btn-timer-discard" class="btn btn-secondary btn-timer hidden">
+            <span class="icon">✕</span> <span class="label">Descartar</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL CON SIDEBAR Y CONTENIDO -->
+    <div class="app-body">
+      <!-- SIDEBAR FLUENT -->
+      <nav class="sidebar">
+        <div class="nav-menu">
+          <button class="nav-item active" data-view="dashboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Panel de Control</span>
+          </button>
+          <button class="nav-item" data-view="jobs">
+            <span class="nav-icon">📁</span>
+            <span class="nav-label">Trabajos y Tareas</span>
+          </button>
+          <button class="nav-item" data-view="clients">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">Directorio Clientes</span>
+          </button>
+          <button class="nav-item" data-view="timesheet">
+            <span class="nav-icon">⏱</span>
+            <span class="nav-label">Hoja de Tiempos</span>
+          </button>
+          <button class="nav-item" data-view="reports">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Reportes e Informes</span>
+          </button>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="privacy-badge">
+            <span class="dot"></span>
+            <span>100% Local & Privado</span>
+          </div>
+          <div class="tech-tag">SQLite Persistente</div>
+        </div>
+      </nav>
+
+      <!-- ÁREA DE VISTAS -->
+      <main class="content-area">
+        <!-- VISTA 1: DASHBOARD -->
+        <section id="view-dashboard" class="view-panel active">
+          <div class="view-header">
+            <h2>Panel de Control</h2>
+            <p class="subtitle">Resumen en vivo de productividad, horas acumuladas y métricas financieras.</p>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Horas Hoy</span>
+                <span class="kpi-icon">⏱️</span>
+              </div>
+              <div class="kpi-value" id="kpi-hours-today">0.0 h</div>
+              <div class="kpi-meta">Jornada actual</div>
+            </div>
+
+            <div class="kpi-card accent-green">
+              <div class="kpi-header">
+                <span class="kpi-title">Facturable Hoy</span>
+                <span class="kpi-icon">💰</span>
+              </div>
+              <div class="kpi-value" id="kpi-billable-today">$0.00</div>
+              <div class="kpi-meta">Ingresos estimados hoy</div>
+            </div>
+
+            <div class="kpi-card accent-blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Horas Este Mes</span>
+                <span class="kpi-icon">📅</span>
+              </div>
+              <div class="kpi-value" id="kpi-hours-month">0.0 h</div>
+              <div class="kpi-meta" id="kpi-billable-month">Facturable: $0.00</div>
+            </div>
+
+            <div class="kpi-card accent-purple">
+              <div class="kpi-header">
+                <span class="kpi-title">Trabajos Activos</span>
+                <span class="kpi-icon">📂</span>
+              </div>
+              <div class="kpi-value" id="kpi-active-jobs">0</div>
+              <div class="kpi-meta" id="kpi-total-clients">Clientes: 0</div>
+            </div>
+          </div>
+
+          <div class="dashboard-chart-card">
+            <div class="chart-header">
+              <h3>Rendimiento de los Últimos 7 Días</h3>
+              <span class="chart-subtitle">Horas registradas diariamente</span>
+            </div>
+            <div id="weekly-chart" class="weekly-chart-container">
+              <!-- Renderizado dinámico de barras -->
+            </div>
+          </div>
+
+          <div class="recent-card">
+            <div class="recent-header">
+              <h3>Últimas Sesiones Registradas</h3>
+              <button class="btn btn-outline btn-sm" onclick="app.navigate('timesheet')">Ver Todo</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Trabajo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Duración</th>
+                    <th>Facturable</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-tbody">
+                  <!-- Filas dinámicas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA 2: TRABAJOS Y TAREAS -->
+        <section id="view-jobs" class="view-panel">
+          <div class="view-header flex-between">
+            <div>
+              <h2>Control de Trabajos y Tareas</h2>
+              <p class="subtitle">Gestiona proyectos, seguimiento de horas estimadas vs registradas y estados.</p>
+            </div>
+            <button id="btn-add-job" class="btn btn-primary">
+              <span class="icon">+</span> Nuevo Trabajo
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="jobs-search-input" class="form-control filter-search" placeholder="Buscar por título, cliente o descripción..." />
+            <select id="jobs-status-filter" class="form-control filter-select">
+              <option value="Todos">Todos los Estados</option>
+              <option value="Pendiente">🟡 Pendiente</option>
+              <option value="En progreso">🟠 En progreso</option>
+              <option value="En revisión">🔵 En revisión</option>
+              <option value="Entregado">🟢 Entregado</option>
+              <option value="Facturado">🟣 Facturado</option>
+            </select>
+            <select id="jobs-client-filter" class="form-control filter-select">
+              <option value="0">Todos los Clientes</option>
+            </select>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Trabajo / Tarea</th>
+                    <th>Cliente</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Progreso (Horas)</th>
+                    <th>Tarifa</th>
+                    <th>Total Generado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-tbody">
+                  <!-- Filas dinámicas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA 3: CLIENTES -->
+        <section id="view-clients" class="view-panel">
+          <div class="view-header flex-between">
+            <div>
+              <h2>Directorio de Clientes</h2>
+              <p class="subtitle">Administración de clientes, tarifas horarias por defecto y facturación acumulada.</p>
+            </div>
+            <button id="btn-add-client" class="btn btn-primary">
+              <span class="icon">+</span> Nuevo Cliente
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="clients-search-input" class="form-control filter-search" placeholder="Buscar por nombre, empresa o email..." />
+            <label class="checkbox-label">
+              <input type="checkbox" id="clients-active-only" />
+              <span>Solo clientes activos</span>
+            </label>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Empresa</th>
+                    <th>Contacto</th>
+                    <th>Tarifa Base</th>
+                    <th>Trabajos Activos</th>
+                    <th>Total Facturado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="clients-tbody">
+                  <!-- Filas dinámicas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA 4: HOJA DE TIEMPOS -->
+        <section id="view-timesheet" class="view-panel">
+          <div class="view-header flex-between">
+            <div>
+              <h2>Hoja de Tiempos (Timesheet)</h2>
+              <p class="subtitle">Auditoría completa de sesiones trabajadas y adición de tiempos manuales.</p>
+            </div>
+            <button id="btn-add-manual-time" class="btn btn-primary">
+              <span class="icon">+</span> Registro Manual
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <select id="timesheet-client-filter" class="form-control filter-select">
+              <option value="0">Todos los Clientes</option>
+            </select>
+            <select id="timesheet-job-filter" class="form-control filter-select">
+              <option value="0">Todos los Trabajos</option>
+            </select>
+            <div class="date-range-group">
+              <label>Desde: <input type="date" id="timesheet-from-date" class="form-control date-input" /></label>
+              <label>Hasta: <input type="date" id="timesheet-to-date" class="form-control date-input" /></label>
+            </div>
+            <button id="btn-timesheet-clear-filters" class="btn btn-outline btn-sm">Limpiar</button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha Inicio</th>
+                    <th>Cliente</th>
+                    <th>Trabajo</th>
+                    <th>Descripción</th>
+                    <th>Duración</th>
+                    <th>Horas</th>
+                    <th>Tarifa</th>
+                    <th>Facturable</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="timesheet-tbody">
+                  <!-- Filas dinámicas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA 5: REPORTES Y EXPORTACIÓN -->
+        <section id="view-reports" class="view-panel">
+          <div class="view-header">
+            <h2>Generación de Informes y Exportación</h2>
+            <p class="subtitle">Exporta informes ejecutivos en formato HTML maquetado formalmente y hojas de cálculo CSV.</p>
+          </div>
+
+          <div class="reports-container">
+            <div class="report-options-card">
+              <h3>Filtros para el Informe</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Cliente:</label>
+                  <select id="report-client-filter" class="form-control">
+                    <option value="0">Todos los Clientes</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Trabajo / Tarea:</label>
+                  <select id="report-job-filter" class="form-control">
+                    <option value="0">Todos los Trabajos</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Fecha Desde:</label>
+                  <input type="date" id="report-from-date" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>Fecha Hasta:</label>
+                  <input type="date" id="report-to-date" class="form-control" />
+                </div>
+              </div>
+
+              <div class="report-actions-row">
+                <button id="btn-export-csv" class="btn btn-success btn-lg">
+                  <span class="icon">📊</span> Exportar a CSV
+                </button>
+                <button id="btn-export-html" class="btn btn-primary btn-lg">
+                  <span class="icon">📄</span> Generar Informe Ejecutivo HTML
+                </button>
+                <button id="btn-open-output-folder" class="btn btn-outline btn-lg">
+                  <span class="icon">📁</span> Abrir Carpeta `outputs/`
+                </button>
+              </div>
+            </div>
+
+            <div id="report-status-banner" class="status-banner hidden">
+              <!-- Mensaje de confirmación con ruta de archivo -->
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- MODALES -->
+
+    <!-- MODAL CLIENTE -->
+    <div id="modal-client" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modal-client-title">Nuevo Cliente</h3>
+          <button class="modal-close" onclick="app.closeModal('modal-client')">&times;</button>
+        </div>
+        <form id="form-client">
+          <input type="hidden" id="client-id" />
+          <div class="form-group">
+            <label>Nombre del Cliente *</label>
+            <input type="text" id="client-name" class="form-control" required placeholder="Ej: Carlos Mendoza" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Empresa</label>
+              <input type="text" id="client-company" class="form-control" placeholder="Ej: Acme SL" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="client-email" class="form-control" placeholder="carlos@empresa.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" id="client-phone" class="form-control" placeholder="+34 600 000 000" />
+            </div>
+            <div class="form-group">
+              <label>Tarifa Horaria Base *</label>
+              <input type="number" step="0.5" min="0" id="client-rate" class="form-control" required value="50.0" />
+            </div>
+            <div class="form-group">
+              <label>Divisa</label>
+              <select id="client-currency" class="form-control">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="ARS">ARS ($)</option>
+                <option value="MXN">MXN ($)</option>
+                <option value="GBP">GBP (£)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Notas Adicionales</label>
+            <textarea id="client-notes" class="form-control" rows="2" placeholder="Detalles o acuerdos comerciales..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="client-active" checked />
+              <span>Cliente Activo</span>
+            </label>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-client')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL TRABAJO / TAREA -->
+    <div id="modal-job" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modal-job-title">Nuevo Trabajo o Proyecto</h3>
+          <button class="modal-close" onclick="app.closeModal('modal-job')">&times;</button>
+        </div>
+        <form id="form-job">
+          <input type="hidden" id="job-id" />
+          <div class="form-group">
+            <label>Cliente Asignado *</label>
+            <select id="job-client-id" class="form-control" required>
+              <!-- Opciones dinámicas -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Título del Trabajo o Tarea *</label>
+            <input type="text" id="job-title-input" class="form-control" required placeholder="Ej: Rediseño Portal Corporativo" />
+          </div>
+          <div class="form-group">
+            <label>Descripción del Trabajo</label>
+            <textarea id="job-desc" class="form-control" rows="2" placeholder="Objetivos, requerimientos o alcance..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Estado</label>
+              <select id="job-status" class="form-control">
+                <option value="Pendiente">🟡 Pendiente</option>
+                <option value="En progreso">🟠 En progreso</option>
+                <option value="En revisión">🔵 En revisión</option>
+                <option value="Entregado">🟢 Entregado</option>
+                <option value="Facturado">🟣 Facturado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Prioridad</label>
+              <select id="job-priority" class="form-control">
+                <option value="Baja">Baja</option>
+                <option value="Media" selected>Media</option>
+                <option value="Alta">Alta</option>
+                <option value="Urgente">Urgente</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tarifa Específica (Opcional)</label>
+              <input type="number" step="0.5" min="0" id="job-rate" class="form-control" placeholder="Heredar del cliente" />
+            </div>
+            <div class="form-group">
+              <label>Horas Estimadas</label>
+              <input type="number" step="0.5" min="0" id="job-est-hours" class="form-control" value="10.0" />
+            </div>
+            <div class="form-group">
+              <label>Fecha Límite</label>
+              <input type="date" id="job-due-date" class="form-control" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-job')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Trabajo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL REGISTRO MANUAL DE TIEMPO -->
+    <div id="modal-time" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Añadir Entrada Manual de Tiempo</h3>
+          <button class="modal-close" onclick="app.closeModal('modal-time')">&times;</button>
+        </div>
+        <form id="form-time">
+          <div class="form-group">
+            <label>Trabajo / Tarea *</label>
+            <select id="time-job-id" class="form-control" required>
+              <!-- Opciones dinámicas -->
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fecha y Hora Inicio *</label>
+              <input type="datetime-local" id="time-start" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>Duración (Horas y Minutos) *</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" min="0" id="time-hours" class="form-control" placeholder="Horas" value="1" required />
+                <input type="number" min="0" max="59" id="time-minutes" class="form-control" placeholder="Minutos" value="0" required />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descripción de lo realizado</label>
+            <input type="text" id="time-desc" class="form-control" placeholder="Ej: Implementación de componentes y pruebas" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tarifa Horaria (dejar vacío para usar predeterminada)</label>
+              <input type="number" step="0.5" min="0" id="time-rate" class="form-control" placeholder="Predeterminada" />
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+              <label class="checkbox-label" style="margin-bottom: 8px;">
+                <input type="checkbox" id="time-billable" checked />
+                <span>Tiempo Facturable</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-time')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Registrar Tiempo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

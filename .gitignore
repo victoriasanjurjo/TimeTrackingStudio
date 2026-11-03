@@ -1,25 +1,19 @@
-# Compilaciones y artefactos de .NET / C#
-bin/
-obj/
-AppPackages/
-BundleArtifacts/
-Package.StoreAssociation.xml
-_pkginfo.txt
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+# Rust / Cargo build targets
+target/
+src-tauri/target/
+Cargo.lock
 
-# Visual Studio y JetBrains
-.vs/
-.idea/
-.vscode/
+# Node / Tauri
+node_modules/
 
-# Salidas de reportes generados
-outputs/*.csv
-outputs/*.html
+# Local databases and outputs
+config/*.db-journal
+config/*.db-wal
+config/*.db-shm
 *.log
 
-# Bases de datos temporales
-*.db-journal
-*.sqlite3-journal
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.user
