@@ -101,3 +101,4 @@ El archivo binario standalone resultante queda ubicado en:
 ```text
 dist/TimeTrackingStudio.exe
 ```
+

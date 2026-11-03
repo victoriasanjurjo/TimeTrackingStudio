@@ -109,29 +109,37 @@ TimeTrackingStudio/
 ## 🚀 Guía de Instalación y Ejecución
 
 ### Prerrequisitos
+
 - **Windows 10 versión 1809 o superior / Windows 11**.
 - **Rust Toolchain** instalado (Rust 1.90+): `rustc` y `cargo`.
 - **Microsoft WebView2 Runtime** (incluido por defecto en Windows 10/11).
 
 ### 1. Ejecutar en Modo Desarrollo
+
 Para compilar y lanzar la aplicación en modo desarrollo:
+
 ```powershell
 cargo run --manifest-path src-tauri/Cargo.toml
 ```
 
 ### 2. Ejecutar la Suite de Pruebas Automatizadas
+
 Para ejecutar las pruebas unitarias y de integración de modelos y base de datos:
+
 ```powershell
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 ### 3. Compilar el Binario Ejecutable Standalone (.exe)
+
 Para generar el archivo ejecutable optimizado de producción:
+
 ```powershell
 cargo build --release --manifest-path src-tauri/Cargo.toml
 ```
 
 El binario ejecutable standalone queda listo en:
+
 ```text
 dist/TimeTrackingStudio.exe
 ```
